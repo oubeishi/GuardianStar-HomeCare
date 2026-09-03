@@ -96,6 +96,7 @@ class MainWindow:
             self._container,
             page_type="chat",
             on_button_click=self._on_sub_button_click,
+            on_navigate=self._on_sub_navigate,
             emoji_size=self._emoji_size,
             label_size=self._label_size
         )
@@ -106,6 +107,7 @@ class MainWindow:
             self._container,
             page_type="help",
             on_button_click=self._on_sub_button_click,
+            on_navigate=self._on_sub_navigate,
             emoji_size=self._emoji_size,
             label_size=self._label_size
         )
@@ -126,11 +128,13 @@ class MainWindow:
 
     def _on_sub_button_click(self, model) -> None:
         """二级菜单按钮点击回调"""
-        if model.button_id == "back":
-            self.show_page("home")
-            return
         if self.on_button_click:
             self.on_button_click(model)
+
+    def _on_sub_navigate(self, target: str) -> None:
+        """处理二级菜单底部导航"""
+        if target == "home":
+            self.show_page("home")
 
     def show_page(self, page_id: str) -> None:
         """

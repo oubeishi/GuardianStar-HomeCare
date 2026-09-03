@@ -42,6 +42,12 @@ CHAT_BUTTONS = [
     ButtonModel("eat", "🍚", "吃饭", "#98FB98", "eat.wav"),
     ButtonModel("situp", "🪑", "坐起来", "#87CEFA", "situp.wav"),
     ButtonModel("call", "📞", "打电话", "#DDA0DD", "call.wav"),
+    ButtonModel("sleep", "😴", "想睡觉", "#B0C4DE", "sleep.wav"),
+    ButtonModel("medicine", "💊", "吃药", "#F0E68C", "medicine.wav"),
+    ButtonModel("tv", "📺", "想看电视", "#AFEEEE", "tv.wav"),
+    ButtonModel("family", "👪", "想家人", "#FFDAB9", "family.wav"),
+    ButtonModel("thanks", "🙏", "谢谢你", "#D8BFD8", "thanks.wav"),
+    ButtonModel("goodnight", "🌙", "晚安", "#778899", "goodnight.wav"),
 ]
 
 # V1 固定词库：需要帮忙（绿色入口）
@@ -51,7 +57,6 @@ HELP_BUTTONS = [
     ButtonModel("toilet", "🚽", "小便", "#FFD700", "toilet.wav"),
     ButtonModel("pain", "🔥", "疼/难受", "#FF0000", "pain.wav", is_emergency=True),
     ButtonModel("hotcold", "🌡️", "热/冷", "#FFA500", "hotcold.wav"),
-    ButtonModel("back", "↩️", "返回首页", "#A9A9A9", is_nav=True),
 ]
 
 # 主菜单入口按钮
