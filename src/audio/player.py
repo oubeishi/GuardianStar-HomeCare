@@ -30,18 +30,21 @@ class AudioPlayer:
         self.sounds_dir = Path(os.path.expanduser(sounds_dir))
         self._volume = volume / 100.0  # 0.0 ~ 1.0
         self._emergency_playing = False
-        self._current_channel: Optional[pygame.mixer.Channel] = None
+        self._initialized = False
+        self._current_channel = None
 
         if pygame is None:
-            logger.error("[Audio] pygame 未安装，播放器初始化失败")
+            logger.error("[Audio] pygame 未安装，音频功能不可用")
             return
 
         try:
             pygame.mixer.init(frequency=16000, size=-16, channels=1, buffer=512)
             pygame.mixer.set_num_channels(2)  # 通道0:普通音频, 通道1:紧急音频（预留）
+            self._initialized = True
             logger.info("[Audio] pygame.mixer 初始化成功")
         except Exception as e:
-            logger.error(f"[Audio] pygame.mixer 初始化失败: {e}")
+            logger.warning(f"[Audio] pygame.mixer 初始化失败（可能无音频设备）: {e}")
+            logger.info("[Audio] 程序将继续运行，但无音频输出")
 
     def _get_path(self, filename: str) -> Optional[Path]:
         """获取音频文件完整路径"""
@@ -83,8 +86,8 @@ class AudioPlayer:
         Returns:
             是否成功开始播放
         """
-        if pygame is None:
-            logger.warning("[Audio] pygame 不可用，跳过播放")
+        if pygame is None or not self._initialized:
+            logger.debug(f"[Audio] 音频不可用，跳过播放: {filename}")
             return False
 
         # 紧急音频保护：普通音频不能打断紧急音频
@@ -122,13 +125,13 @@ class AudioPlayer:
 
     def stop(self) -> None:
         """停止当前播放（仅限非紧急音频上下文使用）"""
-        if pygame and not self._emergency_playing:
+        if pygame and self._initialized and not self._emergency_playing:
             pygame.mixer.stop()
             logger.debug("[Audio] 停止播放")
 
     def stop_emergency(self) -> None:
         """停止紧急音频播放（警报解除时调用）"""
-        if pygame:
+        if pygame and self._initialized:
             pygame.mixer.stop()
             self._emergency_playing = False
             logger.info("[Audio] 紧急音频已停止")
@@ -140,6 +143,6 @@ class AudioPlayer:
     @property
     def is_playing(self) -> bool:
         """是否有音频正在播放"""
-        if pygame is None:
+        if pygame is None or not self._initialized:
             return False
         return pygame.mixer.get_busy()

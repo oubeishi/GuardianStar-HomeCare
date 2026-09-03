@@ -5,8 +5,8 @@ UI 组件 - 巨型按钮
 import tkinter as tk
 from typing import Callable, Optional
 
-from ..models.button import ButtonModel
-from .themes import Theme
+from ...models.button import ButtonModel
+from ..themes import Theme
 
 
 class BigButton(tk.Frame):

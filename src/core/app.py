@@ -188,7 +188,7 @@ class GuardianStarApp:
 
         # 紧急按钮发送通知
         if model.is_emergency:
-            self._send_emergency_notify(f"【紧急】奶奶按下了"{model.label}"按钮，时间：{datetime.now().strftime('%H:%M:%S')}")
+            self._send_emergency_notify(f"【紧急】奶奶按下了「{model.label}」按钮，时间：{datetime.now().strftime('%H:%M:%S')}")
 
     def _on_gpio_emergency(self) -> None:
         """
