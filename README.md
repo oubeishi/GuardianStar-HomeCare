@@ -48,51 +48,72 @@
 git clone git@github.com:oubeishi/GuardianStar-HomeCare.git
 cd GuardianStar-HomeCare
 
-# 2. 准备目录结构
+# 2. 安装依赖
+pip3 install -r requirements.txt
+
+# 3. 准备目录结构
 mkdir -p ~/guardian_star/{sounds,logs}
 
-# 3. 复制配置文件
+# 4. 复制配置文件
 cp config.json ~/guardian_star/
 
-# 4. 复制音频文件
+# 5. 复制音频文件
 cp sounds/*.wav ~/guardian_star/sounds/
 
-# 5. 配置开机自启
-sudo cp autostart.sh /etc/init.d/guardianstar
-sudo chmod +x /etc/init.d/guardianstar
-sudo update-rc.d guardianstar defaults
+# 6. 运行主程序（窗口模式调试用）
+python3 src/main.py --windowed
 
-# 6. 运行主程序
-python3 main.py
+# 7. 配置 systemd 开机自启
+sudo bash install_service.sh
 ```
 
 > 详细部署步骤请参阅 [docs/08-实施手册.md](docs/08-实施手册.md)。
 
 ---
 
-## 项目架构速览
+## 项目架构速览（工程化目录）
 
 ```
 GuardianStar-HomeCare/
-├── README.md              # 项目总入口（本文档）
-├── TODOLIST.md            # 执行任务清单
-├── main.py                # V1 主程序（Tkinter GUI + GPIO + 音频）
-├── config.json            # 运行配置（分辨率、GPIO、颜色、企业微信机器人Token等）
-├── autostart.sh           # 开机自启脚本
-├── sounds/                # 方言音频资源（13个 WAV）
-│   ├── son.wav
-│   ├── daughter.wav
-│   ├── time.wav
-│   ├── eat.wav
-│   ├── situp.wav
-│   ├── call.wav
-│   ├── water.wav
-│   ├── turn.wav
-│   ├── toilet.wav
-│   ├── pain.wav
-│   ├── hotcold.wav
-│   └── emergency.wav
-├── docs/                  # PRD 文档目录
+├── README.md                    # 项目总入口（本文档）
+├── TODOLIST.md                  # 执行任务清单
+├── requirements.txt             # Python 依赖
+├── config.json                  # 运行配置（分辨率、GPIO、颜色、企业微信机器人Token等）
+├── autostart.sh                 # 传统开机自启脚本（备用）
+├── install_service.sh           # systemd 服务安装脚本（推荐）
+├── systemd/
+│   └── guardianstar.service     # systemd 服务定义
+├── src/                         # 源代码（模块化、可迭代）
+│   ├── main.py                  # 程序入口（参数解析、信号处理）
+│   ├── core/                    # 核心层
+│   │   ├── app.py               # 应用主控（模块协调、生命周期管理）
+│   │   ├── config.py            # 配置管理（加载、校验、默认值、热重载预留）
+│   │   ├── logger.py            # 系统日志初始化（文件轮转、级别控制）
+│   │   └── events.py            # 事件总线（发布-订阅，模块解耦）
+│   ├── ui/                      # UI 层
+│   │   ├── main_window.py       # 主窗口（全屏、页面栈、紧急弹窗）
+│   │   ├── themes.py            # 视觉主题（颜色、字体、高对比度）
+│   │   ├── widgets/             # 可复用组件
+│   │   │   ├── big_button.py    # 巨型触控按钮（Emoji+文字+防抖）
+│   │   │   └── flash_overlay.py # 闪屏覆盖层（0.8s 反馈）
+│   │   └── pages/               # 页面
+│   │       ├── home_page.py     # 主菜单（2按钮）
+│   │       └── sub_page.py      # 二级菜单（2×3 网格，复用）
+│   ├── audio/                   # 音频层
+│   │   └── player.py            # pygame 播放器（抢断式、紧急保护、格式校验）
+│   ├── hardware/                # 硬件层（V1 GPIO，V2+ 传感器扩展）
+│   │   ├── gpio_button.py       # GPIO 紧急按钮（中断、防抖、模拟模式）
+│   │   └── sensors.py           # 传感器基类与管理器（V2 压力/V3 温湿度/V4 BLE 预留）
+│   ├── notify/                  # 通知层（多渠道扩展预留）
+│   │   ├── base.py              # 通知抽象基类 + 多渠道组合器
+│   │   └── wecom.py             # 企业微信群机器人（Webhook、重试、@提醒）
+│   ├── data/                    # 数据层
+│   │   └── log_manager.py       # 操作日志（按自然日分文件、线程安全）
+│   └── models/                  # 数据模型
+│       └── button.py            # 按钮数据模型（V1 固定词库、V4 双语预留）
+├── sounds/                      # 方言音频资源（13个 WAV）
+│   └── README.md                # 音频录制规范速查
+├── docs/                        # PRD 文档目录
 │   ├── 00-项目总览.md
 │   ├── 01-V1-详细需求规格.md
 │   ├── 02-V2-安全守护升级.md
@@ -102,8 +123,19 @@ GuardianStar-HomeCare/
 │   ├── 06-硬件物料清单.md
 │   ├── 07-音频资源规范.md
 │   └── 08-实施手册.md
-└── logs/                  # 操作日志（按自然日分文件）
+└── logs/                        # 系统日志 + 操作日志
+    ├── app.log                  # 程序运行日志（轮转）
+    └── YYYY-MM-DD.txt           # 每日操作日志
 ```
+
+### 架构设计要点
+
+| 设计目标 | 实现方式 |
+| :--- | :--- |
+| **可迭代** | 事件总线解耦 + 传感器/通知基类预留扩展接口 |
+| **健壮性** | 各模块异常隔离（`try/except` + 日志记录，不阻塞主程序） |
+| **模块化** | 分层架构：core / ui / audio / hardware / notify / data / models |
+| **工程化** | 配置外置 JSON、类型注解、中文注释、systemd 服务、requirements.txt |
 
 ---
 

@@ -1,0 +1,20 @@
+[Unit]
+Description=GuardianStar HomeCare Service
+After=graphical.target network.target
+
+[Service]
+Type=simple
+User=pi
+Environment=DISPLAY=:0
+Environment=XAUTHORITY=/home/pi/.Xauthority
+WorkingDirectory=/home/pi/GuardianStar-HomeCare
+ExecStartPre=/bin/sh -c 'amixer cset numid=3 1 || true'
+ExecStartPre=/bin/sh -c 'amixer set PCM -- 85% || true'
+ExecStart=/usr/bin/python3 /home/pi/GuardianStar-HomeCare/src/main.py
+Restart=always
+RestartSec=5
+KillMode=mixed
+TimeoutStopSec=10
+
+[Install]
+WantedBy=graphical.target

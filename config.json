@@ -1,0 +1,37 @@
+{
+  "display": {
+    "width": 1920,
+    "height": 1280,
+    "fullscreen": true,
+    "cursor_hide": true
+  },
+  "audio": {
+    "device": "3.5mm",
+    "volume": 85,
+    "sounds_dir": "~/guardian_star/sounds",
+    "format_check": true
+  },
+  "gpio": {
+    "emergency_button": 17,
+    "debounce_ms": 50,
+    "pull_up": true
+  },
+  "wecom": {
+    "enabled": true,
+    "webhook_url": "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=YOUR_KEY",
+    "mentioned_mobile_list": [],
+    "timeout_seconds": 5,
+    "retry_times": 1
+  },
+  "logging": {
+    "dir": "~/guardian_star/logs",
+    "level": "INFO",
+    "console_output": false
+  },
+  "ui": {
+    "flash_duration_ms": 800,
+    "button_emoji_size": 120,
+    "button_label_size": 48,
+    "emergency_emoji_size": 200
+  }
+}

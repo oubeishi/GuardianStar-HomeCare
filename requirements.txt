@@ -1,0 +1,17 @@
+# GuardianStar-HomeCare Python 依赖
+# 安装命令: pip3 install -r requirements.txt
+
+# GUI框架 (Python内置，无需安装，但此处列出以明示)
+# tkinter
+
+# 音频播放
+pygame>=2.5.0
+
+# GPIO控制 (树莓派专用)
+RPi.GPIO>=0.7.1
+
+# HTTP请求
+requests>=2.31.0
+
+# 类型注解支持 (Python 3.11 已内置，低版本需要)
+# typing-extensions>=4.8.0
